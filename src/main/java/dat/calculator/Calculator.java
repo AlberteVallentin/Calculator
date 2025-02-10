@@ -22,6 +22,9 @@ public class Calculator {
     }
 
     public double percentage(double value, double total) {
+        if (total == 0) {
+            throw new ArithmeticException("Cannot calculate percentage of zero");
+        }
         return (value / total) * 100;
     }
 

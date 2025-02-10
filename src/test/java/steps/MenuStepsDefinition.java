@@ -3,11 +3,12 @@ import dat.Main;
 import dat.calculator.Calculator;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.ByteArrayInputStream;
+import java.util.Scanner;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.InputStream;
 
@@ -33,9 +34,12 @@ public class MenuStepsDefinition {
         outputStream.reset();
     }
 
-    @Given("the calculator program is running")
-    public void theCalculatorProgramIsRunning() {
-        Main.printMenu();
+    private void runCalculatorWithInput(String... inputs) {
+        String inputString = String.join("\n", inputs) + "\n";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(inputString.getBytes());
+        System.setIn(inputStream);
+        Main calculatorMain = new Main(calculator, new Scanner(inputStream));
+        calculatorMain.start();
     }
 
     @When("I view the menu")
@@ -43,16 +47,20 @@ public class MenuStepsDefinition {
         Main.printMenu();
     }
 
-    @When("I choose operation {string}")
-    public void iChooseOperation(String operation) {
-        String prompt = "Enter first number: ";
-        System.out.print(prompt);
+    @When("I start the calculator with input {string} and numbers {string} and {string}")
+    public void iStartCalculatorWithInput(String operation, String num1, String num2) {
+        runCalculatorWithInput(operation, num1, num2, "7");
     }
 
-    @When("I enter number {string}")
-    public void iEnterNumber(String number) {
-        String prompt = "Enter second number: ";
-        System.out.print(prompt);
+    @When("I start the calculator with operation {string} and invalid input {string}")
+    public void iStartCalculatorWithInvalidInput(String operation, String invalidInput) {
+        // Efter det ugyldige input skal programmet bede om input igen, så vi giver et gyldigt input efter
+        runCalculatorWithInput(operation, invalidInput, "5", "3", "7");
+    }
+
+    @When("I start the calculator with exit command {string}")
+    public void iStartCalculatorWithExitCommand(String command) {
+        runCalculatorWithInput(command);
     }
 
     @Then("I should see all operation options")
@@ -87,9 +95,22 @@ public class MenuStepsDefinition {
             "Expected prompt 'Enter second number' not found in output: " + output);
     }
 
+    @Then("I should see an invalid input error message")
+    public void iShouldSeeInvalidInputError() {
+        String output = outputStream.toString();
+        assertTrue(output.contains("Error: Invalid input"),
+            "Expected 'Error: Invalid input' message not found in output: " + output);
+    }
+
+    @Then("I should be prompted to enter the number again")
+    public void iShouldBePromptedAgain() {
+        String output = outputStream.toString();
+        assertTrue(output.contains("Enter") && output.contains("number"),
+            "Expected number prompt not found in output: " + output);
+    }
+
     @Then("the program should display exit message")
     public void theProgramShouldDisplayExitMessage() {
-        System.out.println("Thank you for using the calculator. Goodbye!");
         String output = outputStream.toString();
         assertTrue(output.contains("Thank you for using the calculator. Goodbye!"));
     }

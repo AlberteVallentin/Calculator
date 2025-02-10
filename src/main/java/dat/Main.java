@@ -14,7 +14,7 @@ public class Main {
         this(new Calculator(), new Scanner(System.in));
     }
 
-    Main(Calculator calculator, Scanner scanner) {
+    public Main(Calculator calculator, Scanner scanner) {
         this.calculator = calculator;
         this.scanner = scanner;
         this.running = true;
@@ -31,22 +31,32 @@ public class Main {
                     break;
                 }
 
-                System.out.print("Enter first number: ");
-                double a = scanner.nextDouble();
+                double a = getValidNumber("Enter first number: ");
+                double b = getValidNumber("Enter second number: ");
 
-                System.out.print("Enter second number: ");
-                double b = scanner.nextDouble();
+                try {
+                    double result = performCalculation(choice, a, b);
+                    System.out.printf("Result: %.2f%n", result);
+                } catch (ArithmeticException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
 
-                double result = performCalculation(choice, a, b);
-                System.out.printf("Result: %.2f%n", result);
-
-            } catch (ArithmeticException e) {
+            } catch (IllegalArgumentException e) {
                 System.out.println("Error: " + e.getMessage());
-            } catch (InputMismatchException e) {
-                System.out.println("Error: Invalid input. Please enter valid numbers.");
                 scanner.nextLine(); // Clear the invalid input
-            } catch (Exception e) {
-                System.out.println("An unexpected error occurred: " + e.getMessage());
+            }
+        }
+    }
+
+    private double getValidNumber(String prompt) {
+        while (true) {
+            try {
+                System.out.print(prompt);
+                double number = scanner.nextDouble();
+                return number;
+            } catch (InputMismatchException e) {
+                System.out.println("Error: Invalid input. Please enter a valid number.");
+                scanner.nextLine(); // Clear the invalid input
             }
         }
     }
@@ -64,11 +74,18 @@ public class Main {
     }
 
     private int getValidChoice() {
-        int choice = scanner.nextInt();
-        if (choice < 1 || choice > 7) {
-            throw new IllegalArgumentException("Invalid choice. Please select a number between 1 and 7.");
+        while (true) {
+            try {
+                int choice = scanner.nextInt();
+                if (choice < 1 || choice > 7) {
+                    throw new IllegalArgumentException("Invalid choice. Please select a number between 1 and 7.");
+                }
+                return choice;
+            } catch (InputMismatchException e) {
+                scanner.nextLine(); // Clear the invalid input
+                throw new IllegalArgumentException("Invalid choice. Please enter a number.");
+            }
         }
-        return choice;
     }
 
     private double performCalculation(int choice, double a, double b) {

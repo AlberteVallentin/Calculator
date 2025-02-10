@@ -4,20 +4,21 @@ Feature: Calculator Menu Interface
   So that I can easily select the operations I need
 
   Scenario: View calculator menu
-    Given the calculator program is running
     When I view the menu
     Then I should see all operation options
     And the menu should be clearly formatted
 
-  Scenario: Menu navigation
-    Given the calculator program is running
-    When I choose operation "1"
+  Scenario: Menu navigation for addition
+    When I start the calculator with input "1" and numbers "5" and "3"
     Then I should be prompted for first number
-    When I enter number "5"
-    Then I should be prompted for second number
+    And I should be prompted for second number
+
+  Scenario: Invalid number input handling
+    When I start the calculator with operation "1" and invalid input "abc"
+    Then I should see an invalid input error message
+    And I should be prompted to enter the number again
 
   Scenario: Program exit
-    Given the calculator program is running
-    When I choose operation "7"
+    When I start the calculator with exit command "7"
     Then the program should display exit message
     And the program should terminate cleanly

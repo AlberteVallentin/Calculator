@@ -38,3 +38,10 @@ Feature: Calculator Operations
     And I have entered second number 5
     When I press modulus
     Then the result should be 2
+
+  Scenario: Division by zero
+    Given I have entered first number 10
+    And I have entered second number 0
+    When I press divide
+    Then I should see error "Division by zero"
+    And I should be able to perform new calculations
